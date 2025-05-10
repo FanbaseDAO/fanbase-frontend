@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Compass, Bell, User, Plus } from 'lucide-react';
+import fanbaseLogo from '../../assets/fanbase_logo.png';
+
 
 const NavItem = ({ icon, label, to }) => {
   const location = useLocation();
@@ -24,9 +26,11 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6">
         <Link to="/">
-          <div className="bg-white text-black h-10 w-10 rounded-full flex items-center justify-center text-2xl font-bold">
-            F
-          </div>
+          <img 
+            src={fanbaseLogo} 
+            alt="Fanbase Logo" 
+            className="h-10 w-auto object-contain"
+          />
         </Link>
       </div>
       

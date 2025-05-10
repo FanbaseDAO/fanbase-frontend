@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "fanbasedao",
+    "staging": "fanbasedao",
+    "y": "fanbasedao"
+  },
+  "targets": {},
+  "etags": {}
+}

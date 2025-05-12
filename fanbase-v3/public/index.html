@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fanbase – The Ultimate Community Platform</title>
+  <link rel="icon" type="image/png" href="/fanbase_logo.png" />
+  <meta name="description" content="Fanbase – Connect, create, and grow your community like never before!" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 1.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .container {
+      background: rgba(30, 41, 59, 0.98);
+      border-radius: 24px;
+      box-shadow: 0 8px 48px rgba(99,102,241,0.18);
+      padding: 48px 32px 32px 32px;
+      max-width: 430px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 18px;
+      border-radius: 16px;
+      background: #fff;
+      object-fit: contain;
+      box-shadow: 0 2px 16px rgba(99,102,241,0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 12px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(90deg,#6366f1 30%,#a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline {
+      font-size: 1.18rem;
+      margin-bottom: 24px;
+      color: #a5b4fc;
+      font-weight: 500;
+    }
+    .features {
+      text-align: left;
+      margin: 0 auto 24px auto;
+      max-width: 330px;
+      color: #cbd5e1;
+      font-size: 1rem;
+      line-height: 1.6;
+      padding-left: 0;
+      list-style: none;
+    }
+    .features li::before {
+      content: '✔';
+      color: #6366f1;
+      margin-right: 8px;
+      font-weight: bold;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 14px 36px;
+      background: linear-gradient(90deg,#6366f1 30%,#818cf8 100%);
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.18);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .cta:hover {
+      background: linear-gradient(90deg,#818cf8 30%,#6366f1 100%);
+      box-shadow: 0 4px 16px rgba(99,102,241,0.24);
+    }
+    @media (max-width: 600px) {
+      .container { padding: 32px 8px 24px 8px; }
+      h1 { font-size: 1.5rem; }
+      .logo { width: 48px; height: 48px; }
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .container {
+      flex: 1 0 auto;
+    }
+    footer {
+      flex-shrink: 0;
+      width: 100%;
+      text-align: center;
+      padding: 24px 0 16px 0;
+      color: #a5b4fc;
+      font-size: 1rem;
+      background: rgba(30,41,59,0.92);
+      margin-top: 32px;
+      position: relative;
+      bottom: 0;
+      left: 0;
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <img src="fanbase_logo.png" alt="Fanbase Logo" class="logo" />
+    <h1>Fanbase</h1>
+    <div class="tagline">The Ultimate Community Platform</div>
+    <ul class="features">
+      <li>Seamless creator & fan engagement</li>
+      <li>Real-time notifications & updates</li>
+      <li>Profile customization & discovery</li>
+      <li>Secure authentication & wallet support</li>
+      <li>Modern, responsive design</li>
+    </ul>
+    <a class="cta" href="https://ssrfanbasedao-67xy3muyqq-uc.a.run.app/">Enter Fanbase Now</a>
+    <div style="margin-top:18px;font-size:0.98rem;color:#818cf8;">Click the button above to enter the app.</div>
+  </div>
+  <footer style="width:100%;text-align:center;padding:24px 0 16px 0;color:#a5b4fc;font-size:1rem;background:rgba(30,41,59,0.92);margin-top:32px;">
+    2025 Fanbase. All rights reserved.<br>
+    Contact: info@fanbase.com | Social links coming soon
+  </footer>
+</body>
+</html>

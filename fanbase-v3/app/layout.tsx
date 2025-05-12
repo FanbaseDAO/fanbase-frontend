@@ -9,8 +9,8 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Account Kit Quickstart",
-  description: "Account Kit Quickstart NextJS Template",
+  title: "Fanbase",
+  description: "Fanbase - The Ultimate Community Platform",
 };
 
 export default function RootLayout({
@@ -27,6 +27,9 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/png" href="/fanbase_logo.png" />
+      </head>
       <body className={inter.className}>
         <Providers initialState={initialState}>{children}</Providers>
       </body>

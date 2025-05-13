@@ -32,7 +32,18 @@ function DropdownItem({
   return (
     <button
       className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800"
-      onClick={onClick}
+      onClick={(e) => {
+        // Prevent default and stop propagation to ensure the event doesn't bubble
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Delay the onClick to ensure the event doesn't get swallowed
+        if (onClick) {
+          setTimeout(() => {
+            onClick();
+          }, 10);
+        }
+      }}
     >
       {label}
     </button>
@@ -42,6 +53,24 @@ function DropdownItem({
 export default function Header() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if we're on mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkIfMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -60,6 +89,37 @@ export default function Header() {
   const { openAuthModal } = useAuthModal();
   const { logout } = useLogout();
   const signerStatus = useSignerStatus();
+
+  const handleLoginClick = () => {
+    console.log("login button clicked");
+    // First close the dropdown
+    setShowProfileDropdown(false);
+    
+    // Important: Add a delay before opening the modal on mobile
+    if (isMobile) {
+      setTimeout(() => {
+        openAuthModal();
+      }, 100);
+    } else {
+      openAuthModal();
+    }
+  };
+
+  // Add a standalone login button for mobile view
+  const MobileLoginOption = () => {
+    if (user) return null;
+    
+    return (
+      <div className="px-4 pb-4">
+        <button
+          className="w-full bg-purple-600 text-white rounded-md py-2 font-medium"
+          onClick={handleLoginClick}
+        >
+          Login
+        </button>
+      </div>
+    );
+  };
 
   return (
     <header className="border-b border-gray-800 bg-gray-950">
@@ -93,7 +153,11 @@ export default function Header() {
 
             {/* Profile Dropdown (mobile) */}
             {showProfileDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10">
+              <div 
+                className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50"
+                // Stop click propagation at the container level
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="p-4 border-b border-gray-700">
                   <div className="flex items-center">
                     <div className="bg-purple-600 h-8 w-8 rounded-full flex items-center justify-center mr-3">
@@ -126,7 +190,23 @@ export default function Header() {
                   {user ? (
                     <DropdownItem label="Logout" onClick={logout} />
                   ) : (
-                    <DropdownItem label="Login" onClick={openAuthModal} />
+                    <div>
+                      {/* Custom inline login button handling for mobile */}
+                      <button
+                        className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowProfileDropdown(false);
+                          setTimeout(() => {
+                            console.log("Direct login click from mobile dropdown");
+                            openAuthModal();
+                          }, 100);
+                        }}
+                      >
+                        Login
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -147,6 +227,9 @@ export default function Header() {
             />
           </div>
         </div>
+        
+        {/* Additional standalone login button for mobile */}
+        <MobileLoginOption />
       </div>
 
       {/* Desktop Header - Normal layout for larger screens */}
@@ -178,7 +261,7 @@ export default function Header() {
 
           {/* Profile Dropdown - Desktop */}
           {showProfileDropdown && (
-            <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10">
+            <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-40">
               <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center">
                   <div className="bg-purple-600 h-8 w-8 rounded-full flex items-center justify-center mr-3">
@@ -211,7 +294,7 @@ export default function Header() {
                 {user ? (
                   <DropdownItem label="Logout" onClick={logout} />
                 ) : (
-                  <DropdownItem label="Login" onClick={openAuthModal} />
+                  <DropdownItem label="Login" onClick={handleLoginClick} />
                 )}
               </div>
             </div>

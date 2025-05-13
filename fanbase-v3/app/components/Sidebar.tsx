@@ -1,7 +1,8 @@
+// components/Sidebar.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, Compass, Bell, User, Plus, Album, Menu, X } from "lucide-react";
+import { Home, Compass, Bell, User, Plus, Menu, X } from "lucide-react";
 
 function NavItem({ icon, label, to, closeMobileSidebar }: { 
   icon: React.ReactNode; 
@@ -9,7 +10,6 @@ function NavItem({ icon, label, to, closeMobileSidebar }: {
   to: string;
   closeMobileSidebar?: () => void;
 }) {
-  // For highlighting active, you could use usePathname from next/navigation if needed
   return (
     <Link
       href={to}
@@ -27,99 +27,82 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check screen size on mount and window resize
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initial check
+    const checkIfMobile = () => setIsMobile(window.innerWidth < 768);
     checkIfMobile();
-    
-    // Add event listener for window resize
-    window.addEventListener('resize', checkIfMobile);
-    
-    // Clean up event listener
-    return () => window.removeEventListener('resize', checkIfMobile);
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const sidebar = document.getElementById('sidebar');
-      const toggleButton = document.getElementById('sidebar-toggle');
-      
+      const sidebar = document.getElementById("sidebar");
+      const toggle = document.getElementById("sidebar-toggle");
       if (
-        isMobile && 
-        isOpen && 
-        sidebar && 
-        toggleButton &&
-        !sidebar.contains(event.target as Node) && 
-        !toggleButton.contains(event.target as Node)
+        isMobile &&
+        isOpen &&
+        sidebar &&
+        toggle &&
+        !sidebar.contains(event.target as Node) &&
+        !toggle.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobile, isOpen]);
-  
-  // Function to close mobile sidebar
+
   const closeMobileSidebar = () => {
-    if (isMobile) {
-      setIsOpen(false);
-    }
+    if (isMobile) setIsOpen(false);
   };
 
-  // Dynamic sidebar classes based on mobile state
   const sidebarClasses = `
     border-r border-gray-800 flex flex-col h-full bg-black
-    ${isMobile ? 'fixed top-0 left-0 z-50 transition-transform duration-300 w-64' : 'w-64'}
-    ${isMobile && !isOpen ? '-translate-x-full' : 'translate-x-0'}
+    ${isMobile ? "fixed top-0 left-0 z-50 transition-transform duration-300 w-64" : "w-64"}
+    ${isMobile && !isOpen ? "-translate-x-full" : "translate-x-0"}
   `;
 
   return (
     <>
-      {/* Mobile menu toggle button */}
+      {/* Mobile menu toggle */}
       {isMobile && (
-        <button 
+        <button
           id="sidebar-toggle"
-          onClick={() => setIsOpen(!isOpen)} 
-          className="fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white md:hidden"
+          onClick={() => setIsOpen(!isOpen)}
+          className="fixed top-10 left-4 z-50 p-2 rounded-md bg-gray-800 text-white md:hidden"
           aria-label="Toggle menu"
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       )}
-      
-      {/* Backdrop overlay (mobile only) */}
+
+      {/* Backdrop */}
       {isMobile && isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40" 
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={closeMobileSidebar}
         />
       )}
-      
+
       {/* Sidebar */}
       <div id="sidebar" className={sidebarClasses}>
-        {/* Logo */}
         <div className="p-6">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/fanbase_logo.png" alt="Fanbase Logo" className="h-10 w-10 object-contain" />
+            <img
+              src="/fanbase_logo.png"
+              alt="Fanbase Logo"
+              className="h-10 w-10 object-contain"
+            />
             <span className="font-bold text-2xl tracking-wide">Fanbase</span>
           </Link>
         </div>
-        
-        {/* Navigation Items */}
         <nav className="flex-1">
           <NavItem icon={<Home size={20} />} label="Home" to="/" closeMobileSidebar={closeMobileSidebar} />
-          <NavItem icon={<Album size={20} />} label="Artists" to="/artists" closeMobileSidebar={closeMobileSidebar} />
+          <NavItem icon={<Compass size={20} />} label="Discover" to="/discover" closeMobileSidebar={closeMobileSidebar} />
           <NavItem icon={<Bell size={20} />} label="Notifications" to="/notifications" closeMobileSidebar={closeMobileSidebar} />
           <NavItem icon={<User size={20} />} label="Profile" to="/profile" closeMobileSidebar={closeMobileSidebar} />
         </nav>
-        
-        {/* Create Button */}
         <div className="p-4 mb-6">
           <Link href="/create" onClick={closeMobileSidebar}>
             <button className="w-full bg-white text-black rounded-full py-2 px-4 font-medium flex items-center justify-center">

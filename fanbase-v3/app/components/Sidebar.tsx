@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { Home, Compass, Bell, User, Plus } from "lucide-react";
+import { Home, Compass, Bell, User, Plus, Album } from "lucide-react";
 
 function NavItem({ icon, label, to }: { icon: React.ReactNode; label: string; to: string }) {
   // For highlighting active, you could use usePathname from next/navigation if needed
@@ -30,7 +30,7 @@ export default function Sidebar() {
       {/* Navigation Items */}
       <nav className="flex-1">
         <NavItem icon={<Home size={20} />} label="Home" to="/" />
-        <NavItem icon={<Compass size={20} />} label="Explore" to="/explore" />
+        <NavItem icon={<Album size={20} />} label="Artists" to="/artists" />
         <NavItem icon={<Bell size={20} />} label="Notifications" to="/notifications" />
         <NavItem icon={<User size={20} />} label="Profile" to="/profile" />
       </nav>

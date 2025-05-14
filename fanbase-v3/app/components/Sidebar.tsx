@@ -99,7 +99,7 @@ export default function Sidebar() {
         </div>
         <nav className="flex-1">
           <NavItem icon={<Home size={20} />} label="Home" to="/" closeMobileSidebar={closeMobileSidebar} />
-          <NavItem icon={<Compass size={20} />} label="Discover" to="/discover" closeMobileSidebar={closeMobileSidebar} />
+          <NavItem icon={<Compass size={20} />} label="Discover" to="/artists" closeMobileSidebar={closeMobileSidebar} />
           <NavItem icon={<Bell size={20} />} label="Notifications" to="/notifications" closeMobileSidebar={closeMobileSidebar} />
           <NavItem icon={<User size={20} />} label="Profile" to="/profile" closeMobileSidebar={closeMobileSidebar} />
         </nav>

@@ -1,10 +1,12 @@
 "use client";
+
 import { useUser } from "@account-kit/react";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import { contractAddress, contractABI } from "@/config";
 import { getMusicList } from "@/lib/userService";
+import { EthereumProvider } from "@walletconnect/ethereum-provider";
 
 interface Music {
   name: string;
@@ -33,6 +35,33 @@ export default function Home() {
     fetchMusic();
   }, []);
 
+  const isMobileDevice = (): boolean => {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  };
+
+  const getProvider = async (): Promise<ethers.BrowserProvider> => {
+    if (!isMobileDevice() && typeof window.ethereum !== "undefined") {
+      // Desktop with injected provider (e.g., MetaMask)
+      return new ethers.BrowserProvider(window.ethereum);
+    } else {
+      // Mobile or no injected provider; use WalletConnect
+      const walletConnectProvider = await EthereumProvider.init({
+        projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string,
+        metadata: {
+          name: "Fanbase",
+          description: "Fanbase",
+          url: "http://ssrfanbasedao-67xy3muyqq-uc.a.run.app/", // Ensure this matches your domain
+          icons: ["/fanbase_logo.png"],
+        },
+        showQrModal: true,
+        optionalChains: [1, 11155111, 8453, 84532],
+      });
+
+      await walletConnectProvider.connect();
+      return new ethers.BrowserProvider(walletConnectProvider);
+    }
+  };
+
   const handleMint = async (musicId: string) => {
     if (!address) {
       alert("Please connect your wallet to mint.");
@@ -44,7 +73,7 @@ export default function Home() {
     setMintSuccess(null);
 
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum as any);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(contractAddress, contractABI, signer);
 

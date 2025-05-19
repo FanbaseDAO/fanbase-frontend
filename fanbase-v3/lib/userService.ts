@@ -1,5 +1,6 @@
 // lib/userService.ts
-import { db } from "./firebase";
+import { db, storage } from "./firebase";
+import { ref, getDownloadURL } from "firebase/storage";
 import {
   doc,
   getDoc,
@@ -109,4 +110,26 @@ export async function updateUser(uid: string, userData: Partial<UserData>): Prom
   
   const updatedUserDoc = await getDoc(userRef);
   return updatedUserDoc.data() as UserData;
+}
+
+export async function getMusicList(): Promise<
+  { id: string; name: string; coverUrl: string }[]
+> {
+  const musicCollection = collection(db, "music");
+  const snapshot = await getDocs(musicCollection);
+  const musicList = await Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const data = doc.data() as { name: string; coverUrl: string };
+      let downloadUrl: string | null = null;
+      try {
+        const storageRef = ref(storage, data.coverUrl);
+        downloadUrl = await getDownloadURL(storageRef);
+      } catch (error) {
+        console.error("Error getting download URL for:", data.coverUrl, error);
+        downloadUrl = data.coverUrl; // Fallback to the gs:// URL in case of error
+      }
+      return { id: doc.id, name: data.name, coverUrl: downloadUrl || "" };
+    })
+  );
+  return musicList;
 }

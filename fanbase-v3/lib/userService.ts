@@ -113,7 +113,7 @@ export async function updateUser(uid: string, userData: Partial<UserData>): Prom
 }
 
 export async function getMusicList(): Promise<
-  { id: string; name: string; coverUrl: string }[]
+  { id: string; name: string; coverUrl: string; artist?: string }[]
 > {
   const musicCollection = collection(db, "music");
   const snapshot = await getDocs(musicCollection);

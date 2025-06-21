@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { Providers } from "./providers";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +32,9 @@ export default function RootLayout({
         <link rel="icon" type="image/png" href="/fanbase_logo.png" />
       </head>
       <body className={inter.className}>
-        <Providers initialState={initialState}>{children}</Providers>
+        <ErrorBoundary>
+          <Providers initialState={initialState}>{children}</Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

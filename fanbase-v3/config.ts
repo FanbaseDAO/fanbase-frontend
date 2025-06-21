@@ -16,8 +16,35 @@ const uiConfig: AlchemyAccountsUIConfig = {
   },
 };
 
-export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || ""; // Your contract address
-export const contractABI = ABI; // Your contract's ABI
+// Validate environment variables
+const requiredEnvVars = {
+  NEXT_PUBLIC_ALCHEMY_API_KEY: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+  NEXT_PUBLIC_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+};
+
+// Check for missing environment variables
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0 && process.env.NODE_ENV === 'production') {
+  console.error('Missing required environment variables:', missingVars);
+}
+
+export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
+export const contractABI = ABI;
+
+// Environment configuration
+export const appConfig = {
+  isDevelopment: process.env.NODE_ENV === 'development',
+  isProduction: process.env.NODE_ENV === 'production',
+  apiUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532'),
+  maxRetries: 3,
+  retryDelay: 1000,
+  gasLimitBuffer: 1.2, // 20% buffer for gas estimation
+};
 
 export const config = createConfig({
   // if you don't want to leak api keys, you can proxy to a backend and set the rpcUrl instead here

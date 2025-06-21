@@ -7,7 +7,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "echo \"No tests specified\" && exit 0",
+    "clean": "rm -rf .next out"
   },
   "dependencies": {
     "@account-kit/core": "^4.34.1",
@@ -24,6 +28,7 @@
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
+    "uuid": "^9.0.1",
     "viem": "^2.29.4"
   },
   "devDependencies": {
@@ -31,6 +36,7 @@
     "@types/node": "^20.17.48",
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18.3.7",
+    "@types/uuid": "^9.0.8",
     "encoding": "^0.1.13",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",

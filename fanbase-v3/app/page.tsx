@@ -1,144 +1,183 @@
 "use client";
 
 import { useUser } from "@account-kit/react";
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
-import { contractAddress, contractABI } from "@/config";
 import { getMusicList } from "@/lib/userService";
-import { EthereumProvider } from "@walletconnect/ethereum-provider";
-
-interface Music {
-  name: string;
-  coverUrl: string;
-  id: string; // Firestore unique ID
-}
+import { MusicNFT } from "@/types";
+import { useContract } from "@/hooks/useContract";
+import { useWallet } from "@/hooks/useWallet";
+import MusicCard from "./components/MusicCard";
+import LoadingSpinner from "./components/ui/LoadingSpinner";
+import ErrorMessage from "./components/ui/ErrorMessage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export default function Home() {
   const user = useUser();
-  const address = user?.address;
-  const [musicList, setMusicList] = useState<Music[]>([]);
-  const [minting, setMinting] = useState<string | null>(null);
-  const [mintError, setMintError] = useState<string | null>(null);
-  const [mintSuccess, setMintSuccess] = useState<string | null>(null);
+  const { mintNFT, state: contractState, resetState } = useContract();
+  const { state: walletState, connect } = useWallet();
+  
+  const [musicList, setMusicList] = useState<MusicNFT[]>([]);
+  const [isLoadingMusic, setIsLoadingMusic] = useState(true);
+  const [musicError, setMusicError] = useState<string | null>(null);
+  const [activeMintId, setActiveMintId] = useState<string | null>(null);
+  const [successfulMints, setSuccessfulMints] = useState<Set<string>>(new Set());
 
+  // Fetch music list on component mount
   useEffect(() => {
     const fetchMusic = async () => {
       try {
+        setIsLoadingMusic(true);
+        setMusicError(null);
         const musicData = await getMusicList();
-        setMusicList(musicData);
+        setMusicList(musicData.map(item => ({
+          ...item,
+          artist: item.artist || "Unknown Artist"
+        })));
       } catch (error: any) {
         console.error("Error fetching music:", error);
+        setMusicError("Failed to load music. Please try again later.");
+      } finally {
+        setIsLoadingMusic(false);
       }
     };
 
     fetchMusic();
   }, []);
 
-  const isMobileDevice = (): boolean => {
-    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  };
-
-  const getProvider = async (): Promise<ethers.BrowserProvider> => {
-    if (!isMobileDevice() && typeof window.ethereum !== "undefined") {
-      // Desktop with injected provider (e.g., MetaMask)
-      return new ethers.BrowserProvider(window.ethereum);
-    } else {
-      // Mobile or no injected provider; use WalletConnect
-      const walletConnectProvider = await EthereumProvider.init({
-        projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string,
-        metadata: {
-          name: "Fanbase",
-          description: "Fanbase",
-          url: "http://ssrfanbasedao-67xy3muyqq-uc.a.run.app/", // Ensure this matches your domain
-          icons: ["/fanbase_logo.png"],
-        },
-        showQrModal: true,
-        optionalChains: [1, 11155111, 8453, 84532],
-      });
-
-      await walletConnectProvider.connect();
-      return new ethers.BrowserProvider(walletConnectProvider);
+  // Handle mint success
+  useEffect(() => {
+    if (contractState.success && activeMintId) {
+      setSuccessfulMints(prev => new Set(Array.from(prev).concat(activeMintId)));
+      // Auto-reset after 5 seconds
+      setTimeout(() => {
+        resetState();
+        setActiveMintId(null);
+      }, 5000);
     }
-  };
+  }, [contractState.success, activeMintId, resetState]);
 
   const handleMint = async (musicId: string) => {
-    if (!address) {
-      alert("Please connect your wallet to mint.");
+    if (!user?.address) {
+      connect();
       return;
     }
 
-    setMinting(musicId);
-    setMintError(null);
-    setMintSuccess(null);
-
     try {
-      const provider = await getProvider();
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-      const tx = await contract.mint(address, { gasLimit: 500000 });
-      console.log("Minting transaction sent:", tx);
-
-      const receipt = await tx.wait();
-      console.log("Minting confirmed!", receipt);
-
-      // Optional: Search for TokenMinted event in logs
-      const tokenMintedEvent = receipt.logs.find(
-        (log: ethers.Log) => log.address.toLowerCase() === contractAddress.toLowerCase()
-      );
-
-      // Whether or not we find the event, assume success if confirmed
-      if (tokenMintedEvent) {
-        console.log("TokenMinted event found:", tokenMintedEvent);
-      }
-
-      setMintSuccess(musicId);
+      setActiveMintId(musicId);
+      resetState();
+      
+      await mintNFT({ to: user.address });
     } catch (error: any) {
-      console.error("Error minting:", error);
-      setMintError(error.message || "An error occurred while minting.");
-      alert(`Minting failed: ${error.message || "Unknown error"}`);
-    } finally {
-      setMinting(null);
+      console.error("Minting error:", error);
+      // Error is handled by the useContract hook
     }
   };
 
-  return (
-    <Layout>
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">Discover Music NFTs</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {musicList.map((music) => (
-            <div key={music.id} className="bg-gray-800 rounded-lg shadow-md p-4">
-              <img
-                src={music.coverUrl}
-                alt={music.name}
-                className="rounded-md w-full h-auto mb-2"
-              />
-              <h2 className="text-xl font-semibold text-white mb-2">{music.name}</h2>
-              <button
-                onClick={() => handleMint(music.id)}
-                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
-                  minting === music.id ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={minting === music.id}
-              >
-                {minting === music.id
-                  ? "Minting..."
-                  : mintSuccess === music.id
-                  ? "Successfully minted!"
-                  : "Mint"}
-              </button>
-              {mintError && minting === music.id && (
-                <p className="text-red-500 mt-2">{mintError}</p>
-              )}
-              {mintSuccess === music.id && (
-                <p className="text-green-500 mt-2">Check your wallet for the NFT.</p>
-              )}
-            </div>
-          ))}
+  const retryFetchMusic = () => {
+    setMusicError(null);
+    setIsLoadingMusic(true);
+    
+    const fetchMusic = async () => {
+      try {
+        const musicData = await getMusicList();
+        setMusicList(musicData.map(item => ({
+          ...item,
+          artist: item.artist || "Unknown Artist"
+        })));
+      } catch (error: any) {
+        console.error("Error fetching music:", error);
+        setMusicError("Failed to load music. Please try again later.");
+      } finally {
+        setIsLoadingMusic(false);
+      }
+    };
+
+    fetchMusic();
+  };
+
+  if (isLoadingMusic) {
+    return (
+      <Layout>
+        <div className="p-8 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <LoadingSpinner size="lg" className="mb-4" />
+            <p className="text-gray-400">Loading music collection...</p>
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    );
+  }
+
+  if (musicError) {
+    return (
+      <Layout>
+        <div className="p-8">
+          <ErrorMessage 
+            message={musicError} 
+            onRetry={retryFetchMusic}
+            className="max-w-md mx-auto"
+          />
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      <Layout>
+        <div className="p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Discover Music NFTs</h1>
+            <p className="text-gray-400">
+              Mint exclusive music NFTs from your favorite artists
+            </p>
+          </div>
+
+          {!user && (
+            <div className="mb-6 bg-blue-900/20 border border-blue-500/20 rounded-lg p-4">
+              <p className="text-blue-400 text-center">
+                Connect your wallet to start minting NFTs
+              </p>
+            </div>
+          )}
+
+          {walletState.error && (
+            <ErrorMessage 
+              message={walletState.error} 
+              className="mb-6"
+            />
+          )}
+
+          {contractState.error && (
+            <ErrorMessage 
+              message={contractState.error} 
+              onRetry={resetState}
+              className="mb-6"
+            />
+          )}
+
+          {musicList.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">No music NFTs available at the moment.</p>
+              <p className="text-gray-500 text-sm mt-2">Check back later for new releases!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {musicList.map((music) => (
+                <MusicCard
+                  key={music.id}
+                  music={music}
+                  onMint={handleMint}
+                  isLoading={contractState.isLoading && activeMintId === music.id}
+                  isSuccess={successfulMints.has(music.id) || (contractState.success !== null && activeMintId === music.id)}
+                  error={contractState.error && activeMintId === music.id ? contractState.error : null}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </Layout>
+    </ErrorBoundary>
   );
 }
